@@ -1,0 +1,34 @@
+# just to test what Kubernetes does with conflicting ports
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app.kubernetes.io/instance: a-single-pod
+    foo: bar
+  name: hello-1
+  namespace: default
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      ports:
+        - name: web
+          containerPort: 8080
+  hostNetwork: true
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app.kubernetes.io/instance: a-single-pod
+    foo: bar
+  name: hello-2
+  namespace: default
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      ports:
+        - name: web
+          containerPort: 8080
+  hostNetwork: true

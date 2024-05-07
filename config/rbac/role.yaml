@@ -1,0 +1,79 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - game.believer.dev
+  resources:
+  - gameservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - game.believer.dev
+  resources:
+  - gameservers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - game.believer.dev
+  resources:
+  - gameservers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - game.believer.dev
+  resources:
+  - playtests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - game.believer.dev
+  resources:
+  - playtests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - game.believer.dev
+  resources:
+  - playtests/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -1,0 +1,12 @@
+apiVersion: game.believer.dev/v1alpha1
+kind: Playtest
+metadata:
+  name: playtest-sample
+  namespace: game-servers
+spec:
+  displayName: "Playtest Sample"
+  version: 7c3997c5
+  minGroups: 5
+  playersPerGroup: 4
+  startTime: 2023-09-28T16:25:00Z
+  feedbackURL: "https://google.com"

@@ -1,0 +1,9 @@
+apiVersion: game.believer.dev/v1alpha1
+kind: GameServer
+metadata:
+  name: gameserver-sample
+  namespace: gameservers
+  labels:
+    believer.dev/commit: 420e4db0
+spec:
+  version: linux-server-420e4db0 # image tag to use for game server

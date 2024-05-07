@@ -1,0 +1,93 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.3
+  creationTimestamp: null
+  name: gameservers.game.believer.dev
+spec:
+  group: game.believer.dev
+  names:
+    kind: GameServer
+    listKind: GameServerList
+    plural: gameservers
+    shortNames:
+    - gs
+    singular: gameserver
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.ip
+      name: IP
+      type: string
+    - jsonPath: .status.port
+      name: Port
+      type: integer
+    - jsonPath: .status.reservedCount
+      name: Reserved Slots
+      type: integer
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: GameServer is the Schema for the gameservers API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GameServerSpec defines the desired state of GameServer
+            properties:
+              displayName:
+                description: DisplayName is the human-readable name of the game server
+                type: string
+              map:
+                description: Path to map for server to load
+                type: string
+              version:
+                description: Version corresponds to the git commit SHA of the desired
+                  game version
+                type: string
+            required:
+            - version
+            type: object
+          status:
+            description: GameServerStatus defines the observed state of GameServer
+            properties:
+              ip:
+                description: IP represents the underlying pod's IP
+                type: string
+              netimguiPort:
+                description: NetImguiPort represents the port on which the underlying
+                  pod is listening for netimgui traffic
+                format: int32
+                type: integer
+              podRef:
+                description: PodRef refers to the name of the Pod backing the GameServer
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              port:
+                description: Port represents the port on which the underlying Pod
+                  is listening for game traffic
+                format: int32
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
