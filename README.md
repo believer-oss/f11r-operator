@@ -12,12 +12,44 @@ kind: GameServer
 metadata:
   name: gameserver-sample
 spec:
-  # image tag to use for game server
-  version: linux-server-420e4db0
+  # optional display name override (Friendshipper uses this)
+  displayName: my cool server
 
-  # list of unique IDs reserving slots 
-  reservedSlots:
-    - myUser
+  # path to Unreal map to load
+  map: /Game/Levels/MyMap
+
+  # image tag to use for game server
+  version: my-tag-123
+```
+
+There is also a `Playtest` custom resource which automatically provisions `GameServer` objects based on some parameters. 
+
+```yaml
+apiVersion: game.believer.dev/v1alpha1
+kind: Playtest
+metadata:
+  name: playtest-sample
+spec:
+  # optional display name override (Friendshipper uses this)
+  displayName: my cool playtest
+
+  # URL to Playtest feedback form (optional)
+  feedbackURL: example.com
+
+  # path to Unreal map to load
+  map: /Game/Levels/MyMap
+
+  # starting number of groups (one GameServer will be provisioned for each)
+  minGroups: 2
+
+  # maximum allowed number of players per group
+  playersPerGroup: 2
+
+  # playtest start time (servers will be provisioned relative to this time)
+  startTime: "2024-01-01T00:00:00.000Z"
+
+  # image tag to use for game server
+  version: my-tag-123
 ```
 
 ## Getting Started
