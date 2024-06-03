@@ -136,7 +136,12 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 		case corev1.PodSucceeded:
 			// if the pod has exited successfully, we should delete the GameServer object
 			if err := r.Client.Delete(ctx, gameServer); err != nil {
+				if apierrors.IsNotFound(err) {
+					return ctrl.Result{}, nil
+				}
+
 				log.Error(err, "Error deleting GameServer")
+				return ctrl.Result{}, err
 			}
 
 			return ctrl.Result{}, nil
@@ -259,6 +264,35 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 	}
 
 	if err := r.Client.Create(ctx, pod); err != nil {
+		// get the pod again and check if it's completed, then delete it if so
+		if apierrors.IsAlreadyExists(err) {
+			pod := &corev1.Pod{}
+			if err := r.Client.Get(ctx, types.NamespacedName{Namespace: gameServer.GetNamespace(), Name: gameServer.GetName()}, pod); err != nil {
+				if apierrors.IsNotFound(err) {
+					return ctrl.Result{Requeue: true}, nil
+				}
+
+				return ctrl.Result{}, err
+			}
+
+			switch pod.Status.Phase {
+			case corev1.PodSucceeded:
+				if err := r.Client.Delete(ctx, pod); err != nil {
+					if apierrors.IsNotFound(err) {
+						return ctrl.Result{Requeue: true}, nil
+					}
+
+					return ctrl.Result{}, err
+				}
+			default:
+				log.Info("Pod already exists and has not completed, requeuing")
+				gameServer.Status.PodRef = &corev1.LocalObjectReference{
+					Name: pod.GetName(),
+				}
+
+				return ctrl.Result{Requeue: true}, nil
+			}
+		}
 		return ctrl.Result{}, err
 	}
 
