@@ -1,0 +1,32 @@
+name: docker
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'version tag (e.g. 1.0.0)'
+        required: true
+
+env:
+  IMAGE_NAME: f11r-operator
+
+jobs:
+  docker:
+    name: Docker Build and Push
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+      - name: Build, tag, and push image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t ghcr.io/believer-oss/$IMAGE_NAME:$IMAGE_TAG .
+          docker tag ghcr.io/believer-oss/$IMAGE_NAME:$IMAGE_TAG ghcr.io/believer-oss/$IMAGE_NAME:${{ github.event.inputs.version }}
+          docker push ghcr.io/believer-oss/$IMAGE_NAME:$IMAGE_TAG
+          docker push ghcr.io/believer-oss/$IMAGE_NAME:${{ github.event.inputs.version }}
