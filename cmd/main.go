@@ -64,6 +64,7 @@ func main() {
 	var gamePortMin int
 	var gamePortMax int
 	var netimguiPortMin int
+	var statusPortMin int
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -74,6 +75,7 @@ func main() {
 	flag.IntVar(&gamePortMin, "game-port-min", 7700, "lower bound of game port range")
 	flag.IntVar(&gamePortMax, "game-port-max", 7800, "upper bound of game port range")
 	flag.IntVar(&netimguiPortMin, "netimgui-port-min", 7800, "lower bound of netimgui port range")
+	flag.IntVar(&statusPortMin, "status-port-min", 9000, "lower bound of netimgui port range")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -122,6 +124,7 @@ func main() {
 		GamePortMin:     int32(gamePortMin),
 		GamePortMax:     int32(gamePortMax),
 		NetImguiPortMin: int32(netimguiPortMin),
+		StatusPortMin:   int32(statusPortMin),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GameServer")
 		os.Exit(1)
