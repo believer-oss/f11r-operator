@@ -51,6 +51,7 @@ type GameServerReconciler struct {
 	GamePortMin     int32
 	GamePortMax     int32
 	NetImguiPortMin int32
+	StatusPortMin   int32
 }
 
 //+kubebuilder:rbac:groups=game.believer.dev,resources=gameservers,verbs=get;list;watch;create;update;patch;delete
@@ -201,8 +202,10 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 	netimguiPort := (port - r.GamePortMin) + r.NetImguiPortMin
 	netimguiPortArg := fmt.Sprintf("-NetImguiClientPort=%d", netimguiPort)
 
-	args = append(args, portArg)
-	args = append(args, netimguiPortArg)
+	remoteStatusPort := (port - r.GamePortMin) + r.StatusPortMin
+	remoteStatusPortArg := fmt.Sprintf("-RemoteStatusPort=%d", remoteStatusPort)
+
+	args = append(args, portArg, netimguiPortArg, remoteStatusPortArg)
 
 	storageKey := gameServer.Spec.DisplayName
 	if storageKey == "" {
@@ -244,6 +247,10 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 						},
 						{
 							ContainerPort: netimguiPort,
+							Protocol:      corev1.ProtocolTCP,
+						},
+						{
+							ContainerPort: remoteStatusPort,
 							Protocol:      corev1.ProtocolTCP,
 						},
 					},
