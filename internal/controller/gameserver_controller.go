@@ -152,12 +152,21 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 			return ctrl.Result{Requeue: true}, nil
 		}
 
-		if gameServer.Status.Port != pod.Spec.Containers[0].Ports[0].HostPort {
-			gameServer.Status.Port = pod.Spec.Containers[0].Ports[0].HostPort
-		}
-
-		if gameServer.Status.NetImguiPort != pod.Spec.Containers[0].Ports[1].HostPort {
-			gameServer.Status.NetImguiPort = pod.Spec.Containers[0].Ports[1].HostPort
+		// iterate over the ports
+		for _, port := range pod.Spec.Containers[0].Ports {
+			if port.Name == "game" {
+				if gameServer.Status.Port != port.ContainerPort {
+					gameServer.Status.Port = port.ContainerPort
+				}
+			} else if port.Name == "netimgui" {
+				if gameServer.Status.NetImguiPort != port.ContainerPort {
+					gameServer.Status.NetImguiPort = port.ContainerPort
+				}
+			} else if port.Name == "status" {
+				if gameServer.Status.StatusPort != port.ContainerPort {
+					gameServer.Status.StatusPort = port.ContainerPort
+				}
+			}
 		}
 
 		// requeue until we've got a node

@@ -91,6 +91,11 @@ spec:
                   is listening for game traffic
                 format: int32
                 type: integer
+              statusPort:
+                description: Status port represents the port on which the game server
+                  is serving game/session status information
+                format: int32
+                type: integer
             type: object
         type: object
     served: true

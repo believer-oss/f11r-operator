@@ -53,6 +53,9 @@ type GameServerStatus struct {
 	// NetImguiPort represents the port on which the underlying pod is listening for netimgui traffic
 	NetImguiPort int32 `json:"netimguiPort,omitempty"`
 
+	// Status port represents the port on which the game server is serving game/session status information
+	StatusPort int32 `json:"statusPort,omitempty"`
+
 	// PodRef refers to the name of the Pod backing the GameServer
 	PodRef *corev1.LocalObjectReference `json:"podRef,omitempty"`
 }
