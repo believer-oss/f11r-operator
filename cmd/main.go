@@ -75,7 +75,7 @@ func main() {
 	flag.IntVar(&gamePortMin, "game-port-min", 7700, "lower bound of game port range")
 	flag.IntVar(&gamePortMax, "game-port-max", 7800, "upper bound of game port range")
 	flag.IntVar(&netimguiPortMin, "netimgui-port-min", 7800, "lower bound of netimgui port range")
-	flag.IntVar(&statusPortMin, "status-port-min", 9000, "lower bound of netimgui port range")
+	flag.IntVar(&statusPortMin, "status-port-min", 9000, "lower bound of status port range")
 	opts := zap.Options{
 		Development: true,
 	}
