@@ -242,14 +242,17 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 					Args:  args,
 					Ports: []corev1.ContainerPort{
 						{
+							Name:          "game",
 							ContainerPort: port,
 							Protocol:      corev1.ProtocolUDP,
 						},
 						{
+							Name:          "netimgui",
 							ContainerPort: netimguiPort,
 							Protocol:      corev1.ProtocolTCP,
 						},
 						{
+							Name:          "status",
 							ContainerPort: remoteStatusPort,
 							Protocol:      corev1.ProtocolTCP,
 						},
