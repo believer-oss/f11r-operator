@@ -67,8 +67,11 @@ spec:
           status:
             description: GameServerStatus defines the observed state of GameServer
             properties:
+              internalIP:
+                description: InternalIP represents the underlying pod's internal IP
+                type: string
               ip:
-                description: IP represents the underlying pod's IP
+                description: IP represents the underlying pod's external IP
                 type: string
               netimguiPort:
                 description: NetImguiPort represents the port on which the underlying

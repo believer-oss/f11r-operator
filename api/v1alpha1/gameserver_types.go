@@ -44,8 +44,11 @@ type GameServerStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// IP represents the underlying pod's IP
+	// IP represents the underlying pod's external IP
 	IP string `json:"ip,omitempty"`
+
+	// InternalIP represents the underlying pod's internal IP
+	InternalIP string `json:"internalIP,omitempty"`
 
 	// Port represents the port on which the underlying Pod is listening for game traffic
 	Port int32 `json:"port,omitempty"`

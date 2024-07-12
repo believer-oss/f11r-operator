@@ -188,6 +188,10 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 			gameServer.Status.IP = ip
 		}
 
+		if gameServer.Status.InternalIP != pod.Status.PodIP {
+			gameServer.Status.InternalIP = pod.Status.PodIP
+		}
+
 		return ctrl.Result{}, nil
 	}
 
