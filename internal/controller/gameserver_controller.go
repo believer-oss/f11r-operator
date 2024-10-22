@@ -273,6 +273,7 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 				},
 			},
 			HostNetwork: true,
+			DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
 			NodeSelector: map[string]string{
 				"builddev.believer.dev/nodetype": "game",
 			},
