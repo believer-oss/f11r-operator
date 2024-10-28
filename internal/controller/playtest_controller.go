@@ -83,10 +83,11 @@ func (r *PlaytestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 func (r *PlaytestReconciler) reconcilePlaytest(ctx context.Context, playtest *gamev1alpha1.Playtest) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 
+	// If playtest is prunable and was created on a previous day, delete it
 	if _, ok := playtest.Annotations["believer.dev/do-not-reconcile"]; !ok {
-		// Check if playtest was created on a previous day
-		now := time.Now()
-		createdOn := playtest.Spec.StartTime.Time
+		pst := time.FixedZone("PST", -8*60*60)
+		now := time.Now().In(pst)
+		createdOn := playtest.Spec.StartTime.Time.In(pst)
 
 		if now.YearDay() > createdOn.YearDay() || now.Year() > createdOn.Year() {
 			// Delete the playtest since it's from a previous day
