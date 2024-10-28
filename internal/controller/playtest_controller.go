@@ -83,6 +83,20 @@ func (r *PlaytestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 func (r *PlaytestReconciler) reconcilePlaytest(ctx context.Context, playtest *gamev1alpha1.Playtest) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 
+	// If playtest is prunable and is more than 24 hours old, delete it
+	if _, ok := playtest.Annotations["believer.dev/do-not-prune"]; !ok {
+		now := time.Now()
+		createdOn := playtest.Spec.StartTime.Time
+
+		if now.Sub(createdOn) > 24*time.Hour {
+			if err := r.Delete(ctx, playtest); err != nil {
+				log.Error(err, "failed to delete old playtest")
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{}, nil
+		}
+	}
+
 	// First, set up default groups
 	if len(playtest.Spec.Groups) == 0 {
 		for i := 1; i <= playtest.Spec.MinGroups; i++ {
