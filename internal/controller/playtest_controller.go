@@ -89,7 +89,6 @@ func (r *PlaytestReconciler) reconcilePlaytest(ctx context.Context, playtest *ga
 		createdOn := playtest.Spec.StartTime.Time
 
 		if now.Sub(createdOn) > 24*time.Hour {
-			// Delete the playtest since it's more than 24 hours old
 			if err := r.Delete(ctx, playtest); err != nil {
 				log.Error(err, "failed to delete old playtest")
 				return ctrl.Result{}, err
