@@ -229,6 +229,9 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 	// Add StorageKey argument
 	args = append(args, fmt.Sprintf("-StorageKey=%s", storageKey))
 
+	// set up OTEL_RESOURCE_ATTRIBUTES env var
+	otelResourceAttributes := fmt.Sprintf("game_server_name=%s", gameServer.GetName())
+
 	// We need to create a Pod.
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -253,6 +256,12 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 					Name:  "game-server",
 					Image: image,
 					Args:  args,
+					Env: []corev1.EnvVar{
+						{
+							Name:  "OTEL_RESOURCE_ATTRIBUTES",
+							Value: otelResourceAttributes,
+						},
+					},
 					Ports: []corev1.ContainerPort{
 						{
 							Name:          "game",
