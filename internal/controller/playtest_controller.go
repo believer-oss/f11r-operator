@@ -236,8 +236,9 @@ func (r *PlaytestReconciler) reconcileGroupServer(ctx context.Context, playtest 
 				},
 			},
 			Spec: gamev1alpha1.GameServerSpec{
-				Version: playtestServerVersion,
-				Map:     playtest.Spec.Map,
+				Version:               playtestServerVersion,
+				Map:                   playtest.Spec.Map,
+				IncludeReadinessProbe: playtest.Spec.IncludeReadinessProbe,
 			},
 		}
 

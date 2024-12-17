@@ -39,7 +39,7 @@ type GameServerSpec struct {
 	Map string `json:"map,omitempty"`
 
 	// IncludeReadinessProbe is true if the game server should include a readiness probe
-	// kubebuilder:default=false
+	// +kubebuilder:default=false
 	IncludeReadinessProbe bool `json:"includeReadinessProbe,omitempty"`
 }
 
