@@ -55,6 +55,7 @@ type PlaytestGroupStatus struct {
 	Name      string                       `json:"name,omitempty"`
 	ServerRef *corev1.LocalObjectReference `json:"serverRef,omitempty"`
 	Users     []string                     `json:"users,omitempty"`
+	Ready     bool                         `json:"ready,omitempty"`
 }
 
 // PlaytestStatus defines the observed state of Playtest

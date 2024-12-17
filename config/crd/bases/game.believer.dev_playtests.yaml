@@ -89,6 +89,8 @@ spec:
                   properties:
                     name:
                       type: string
+                    ready:
+                      type: boolean
                     serverRef:
                       description: |-
                         LocalObjectReference contains enough information to let you locate the
