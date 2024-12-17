@@ -37,6 +37,10 @@ type GameServerSpec struct {
 
 	// Path to map for server to load
 	Map string `json:"map,omitempty"`
+
+	// IncludeReadinessProbe is true if the game server should include a readiness probe
+	// kubebuilder:default=false
+	IncludeReadinessProbe bool `json:"includeReadinessProbe,omitempty"`
 }
 
 // GameServerStatus defines the observed state of GameServer
@@ -61,6 +65,12 @@ type GameServerStatus struct {
 
 	// PodRef refers to the name of the Pod backing the GameServer
 	PodRef *corev1.LocalObjectReference `json:"podRef,omitempty"`
+
+	// PodStatus is the status of the underlying Pod
+	PodStatus *corev1.PodStatus `json:"podStatus,omitempty"`
+
+	// Ready is true if the game server is ready to accept traffic
+	Ready bool `json:"ready,omitempty"`
 }
 
 //+kubebuilder:object:root=true

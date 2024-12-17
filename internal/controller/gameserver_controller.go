@@ -23,12 +23,14 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -118,6 +120,8 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 			return ctrl.Result{}, err
 		}
 
+		gameServer.Status.PodStatus = &pod.Status
+
 		// check Pod conditions
 		switch pod.Status.Phase {
 		case corev1.PodPending:
@@ -179,6 +183,13 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 			return ctrl.Result{}, err
 		}
 
+		// check if pod has the ready condition
+		for _, condition := range pod.Status.Conditions {
+			if condition.Type == corev1.PodReady && condition.Status == corev1.ConditionTrue {
+				gameServer.Status.Ready = true
+			}
+		}
+
 		if ip == "" {
 			log.Error(errors.New("Node does not have a public IP"), "probably no point in requeuing")
 			return ctrl.Result{}, nil
@@ -190,6 +201,10 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 
 		if gameServer.Status.InternalIP != pod.Status.PodIP {
 			gameServer.Status.InternalIP = pod.Status.PodIP
+		}
+
+		if !gameServer.Status.Ready {
+			return ctrl.Result{RequeueAfter: 3 * time.Second}, nil
 		}
 
 		return ctrl.Result{}, nil
@@ -294,6 +309,22 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 				},
 			},
 		},
+	}
+
+	if gameServer.Spec.IncludeReadinessProbe {
+		pod.Spec.Containers[0].ReadinessProbe = &corev1.Probe{
+			ProbeHandler: corev1.ProbeHandler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: "/status",
+					Port: intstr.FromInt(int(remoteStatusPort)),
+				},
+			},
+			InitialDelaySeconds: 10,
+			PeriodSeconds:       5,
+			TimeoutSeconds:      2,
+			SuccessThreshold:    1,
+			FailureThreshold:    3,
+		}
 	}
 
 	if err := r.Client.Create(ctx, pod); err != nil {
