@@ -57,6 +57,11 @@ spec:
                       type: array
                   type: object
                 type: array
+              includeReadinessProbe:
+                default: false
+                description: IncludeReadinessProbe is true if the game server should
+                  include a readiness probe
+                type: boolean
               map:
                 type: string
               minGroups:

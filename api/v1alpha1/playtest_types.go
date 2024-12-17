@@ -45,6 +45,10 @@ type PlaytestSpec struct {
 	UsersToAutoAssign []string `json:"usersToAutoAssign,omitempty"`
 
 	Groups []PlaytestGroup `json:"groups,omitempty"`
+
+	// IncludeReadinessProbe is true if the game server should include a readiness probe
+	// +kubebuilder:default=false
+	IncludeReadinessProbe bool `json:"includeReadinessProbe,omitempty"`
 }
 
 type PlaytestGroupStatus struct {
