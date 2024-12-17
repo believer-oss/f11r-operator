@@ -199,56 +199,32 @@ func (r *PlaytestReconciler) reconcileGroupServer(ctx context.Context, playtest 
 		}
 
 		groupStatus.Ready = gameServer.Status.Ready
+	}
 
-		if time.Now().UTC().Add(10 * time.Minute).After(playtest.Spec.StartTime.Time) {
-			if gameServer.Spec.Version != playtestServerVersion || gameServer.Spec.Map != playtest.Spec.Map {
-				log.Info("deleting gameserver for group", "group", group.Name)
-
-				if err := r.Client.Delete(ctx, gameServer); err != nil {
+	if time.Now().UTC().Add(10 * time.Minute).After(playtest.Spec.StartTime.Time) {
+		if groupStatus.ServerRef != nil {
+			gameServer := &gamev1alpha1.GameServer{}
+			if err := r.Client.Get(ctx, client.ObjectKey{
+				Name:      groupStatus.ServerRef.Name,
+				Namespace: playtest.GetNamespace(),
+			}, gameServer); err != nil {
+				if !apierrors.IsNotFound(err) {
 					return false, err
+				} else {
+					groupStatus.ServerRef = nil
 				}
+			} else {
+				if gameServer.Spec.Version != playtestServerVersion || gameServer.Spec.Map != playtest.Spec.Map {
+					log.Info("deleting gameserver for group", "group", group.Name)
 
-				groupStatus.ServerRef = nil
+					if err := r.Client.Delete(ctx, gameServer); err != nil {
+						return false, err
+					}
 
-				return true, nil
-			}
+					groupStatus.ServerRef = nil
 
-			log.Info("creating gameserver for group", "group", group.Name)
-
-			formattedGroupName := strings.ReplaceAll(strings.ToLower(group.Name), " ", "-")
-			gameServer := &gamev1alpha1.GameServer{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      fmt.Sprintf("%s-%s", playtest.GetName(), formattedGroupName),
-					Namespace: playtest.GetNamespace(),
-					Labels: map[string]string{
-						"believer.dev/playtest": playtest.GetName(),
-						"believer.dev/commit":   playtest.Spec.Version,
-					},
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							APIVersion: gamev1alpha1.GroupVersion.String(),
-							Kind:       "Playtest",
-							Name:       playtest.GetName(),
-							UID:        playtest.GetUID(),
-							Controller: pointer.Bool(true),
-						},
-					},
-				},
-				Spec: gamev1alpha1.GameServerSpec{
-					Version:               playtestServerVersion,
-					Map:                   playtest.Spec.Map,
-					IncludeReadinessProbe: playtest.Spec.IncludeReadinessProbe,
-				},
-			}
-
-			if err := r.Client.Create(ctx, gameServer); err != nil {
-				if !apierrors.IsAlreadyExists(err) {
-					return false, err
+					return true, nil
 				}
-			}
-
-			groupStatus.ServerRef = &corev1.LocalObjectReference{
-				Name: gameServer.GetName(),
 			}
 
 			if groupStatus.Ready {
@@ -258,6 +234,60 @@ func (r *PlaytestReconciler) reconcileGroupServer(ctx context.Context, playtest 
 			return true, nil
 		}
 
+		log.Info("creating gameserver for group", "group", group.Name)
+
+		formattedGroupName := strings.ReplaceAll(strings.ToLower(group.Name), " ", "-")
+		gameServer := &gamev1alpha1.GameServer{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fmt.Sprintf("%s-%s", playtest.GetName(), formattedGroupName),
+				Namespace: playtest.GetNamespace(),
+				Labels: map[string]string{
+					"believer.dev/playtest": playtest.GetName(),
+					"believer.dev/commit":   playtest.Spec.Version,
+				},
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						APIVersion: gamev1alpha1.GroupVersion.String(),
+						Kind:       "Playtest",
+						Name:       playtest.GetName(),
+						UID:        playtest.GetUID(),
+						Controller: pointer.Bool(true),
+					},
+				},
+			},
+			Spec: gamev1alpha1.GameServerSpec{
+				Version:               playtestServerVersion,
+				Map:                   playtest.Spec.Map,
+				IncludeReadinessProbe: playtest.Spec.IncludeReadinessProbe,
+			},
+		}
+
+		if err := r.Client.Create(ctx, gameServer); err != nil {
+			if !apierrors.IsAlreadyExists(err) {
+				return false, err
+			}
+		}
+
+		groupStatus.ServerRef = &corev1.LocalObjectReference{
+			Name: gameServer.GetName(),
+		}
+
+		return false, nil
+	}
+
+	if groupStatus.ServerRef != nil {
+		gameServer := &gamev1alpha1.GameServer{}
+		if err := r.Client.Get(ctx, client.ObjectKey{
+			Name:      groupStatus.ServerRef.Name,
+			Namespace: playtest.GetNamespace(),
+		}, gameServer); err != nil {
+			if !apierrors.IsNotFound(err) {
+				return false, err
+			} else {
+				groupStatus.ServerRef = nil
+			}
+		}
+
 		if err := r.Client.Delete(ctx, gameServer); err != nil {
 			// It's unclear how much we care about an error here - most errors
 			// are probably because the object no longer exists, which is fine.
@@ -265,8 +295,6 @@ func (r *PlaytestReconciler) reconcileGroupServer(ctx context.Context, playtest 
 		}
 
 		groupStatus.ServerRef = nil
-
-		return false, nil
 	}
 
 	return false, nil
