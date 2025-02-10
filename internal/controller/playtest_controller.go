@@ -259,6 +259,7 @@ func (r *PlaytestReconciler) reconcileGroupServer(ctx context.Context, playtest 
 				Version:               playtestServerVersion,
 				Map:                   playtest.Spec.Map,
 				IncludeReadinessProbe: playtest.Spec.IncludeReadinessProbe,
+				CmdArgs:               playtest.Spec.GameServerCmdArgs,
 			},
 		}
 

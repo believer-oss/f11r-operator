@@ -213,6 +213,7 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 	image := fmt.Sprintf("%s:%s", r.GameServerImage, gameServer.Spec.Version)
 
 	args := []string{}
+	args = append(args, gameServer.Spec.CmdArgs...)
 
 	if gameServer.Spec.Map != "" {
 		args = append(args, gameServer.Spec.Map)

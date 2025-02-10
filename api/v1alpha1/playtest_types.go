@@ -43,6 +43,7 @@ type PlaytestSpec struct {
 
 	// +optional
 	UsersToAutoAssign []string `json:"usersToAutoAssign,omitempty"`
+	GameServerCmdArgs []string `json:"gameServerCmdArgs,omitempty"`
 
 	Groups []PlaytestGroup `json:"groups,omitempty"`
 
