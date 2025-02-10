@@ -41,6 +41,9 @@ type GameServerSpec struct {
 	// IncludeReadinessProbe is true if the game server should include a readiness probe
 	// +kubebuilder:default=false
 	IncludeReadinessProbe bool `json:"includeReadinessProbe,omitempty"`
+
+	// Commandline arguments to start the game server with
+	CmdArgs []string `json:"cmdArgs,omitempty"`
 }
 
 // GameServerStatus defines the observed state of GameServer

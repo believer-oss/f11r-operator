@@ -62,6 +62,10 @@ spec:
               map:
                 description: Path to map for server to load
                 type: string
+              cmdArgs:
+                description: Commandline args to start the server with
+                items:
+                    type: string
               version:
                 description: Version corresponds to the git commit SHA of the desired
                   game version
