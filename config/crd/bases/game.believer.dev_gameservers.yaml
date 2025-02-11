@@ -51,6 +51,11 @@ spec:
           spec:
             description: GameServerSpec defines the desired state of GameServer
             properties:
+              cmdArgs:
+                description: Commandline arguments to start the game server with
+                items:
+                  type: string
+                type: array
               displayName:
                 description: DisplayName is the human-readable name of the game server
                 type: string
@@ -62,10 +67,6 @@ spec:
               map:
                 description: Path to map for server to load
                 type: string
-              cmdArgs:
-                description: Commandline args to start the server with
-                items:
-                    type: string
               version:
                 description: Version corresponds to the git commit SHA of the desired
                   game version

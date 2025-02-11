@@ -43,6 +43,10 @@ spec:
                 type: string
               feedbackURL:
                 type: string
+              gameServerCmdArgs:
+                items:
+                  type: string
+                type: array
               groups:
                 items:
                   description: |-
@@ -72,10 +76,6 @@ spec:
                 format: date-time
                 type: string
               usersToAutoAssign:
-                items:
-                  type: string
-                type: array
-              gameServerCmdArgs:
                 items:
                   type: string
                 type: array
