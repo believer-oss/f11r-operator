@@ -213,11 +213,13 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 	image := fmt.Sprintf("%s:%s", r.GameServerImage, gameServer.Spec.Version)
 
 	args := []string{}
-	args = append(args, gameServer.Spec.CmdArgs...)
 
+	// map needs to be the first argument
 	if gameServer.Spec.Map != "" {
 		args = append(args, gameServer.Spec.Map)
 	}
+
+	args = append(args, gameServer.Spec.CmdArgs...)
 
 	// Select port randomly from our range
 	// We do not need to keep track of which ports we've assigned. This controller watches
