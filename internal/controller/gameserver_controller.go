@@ -120,6 +120,16 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 			return ctrl.Result{}, err
 		}
 
+		podPatchHelper, err := patch.NewHelper(pod, r.Client)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		defer func() {
+			if err := podPatchHelper.Patch(ctx, pod); err != nil {
+				log.Error(err, "error patching pod")
+			}
+		}()
+
 		gameServer.Status.PodStatus = &pod.Status
 
 		// check Pod conditions
@@ -195,14 +205,18 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 			return ctrl.Result{}, nil
 		}
 
+		// Check if pod needs external IP annotation updated
+		if pod.Annotations == nil {
+			pod.Annotations = make(map[string]string)
+		}
+
+		if existingIP, ok := pod.Annotations["believer.dev/external-ip"]; !ok || existingIP != ip {
+			log.Info("external IP changed, updating pod annotation", "old", existingIP, "new", ip)
+			pod.Annotations["believer.dev/external-ip"] = ip
+		}
+
 		if gameServer.Status.IP != ip {
 			gameServer.Status.IP = ip
-
-			// update pod to have annotation game.believer.dev/external-ip=ip
-			pod.Annotations["believer.dev/external-ip"] = ip
-			if err := r.Client.Update(ctx, pod); err != nil {
-				return ctrl.Result{}, err
-			}
 		}
 
 		if gameServer.Status.InternalIP != pod.Status.PodIP {
