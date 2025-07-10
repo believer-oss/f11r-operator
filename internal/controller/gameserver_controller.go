@@ -197,6 +197,12 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 
 		if gameServer.Status.IP != ip {
 			gameServer.Status.IP = ip
+
+			// update pod to have annotation game.believer.dev/external-ip=ip
+			pod.Annotations["believer.dev/external-ip"] = ip
+			if err := r.Client.Update(ctx, pod); err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 
 		if gameServer.Status.InternalIP != pod.Status.PodIP {
@@ -269,6 +275,23 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 			},
 		},
 		Spec: corev1.PodSpec{
+			Volumes: []corev1.Volume{
+				{
+					Name: "external-ip",
+					VolumeSource: corev1.VolumeSource{
+						DownwardAPI: &corev1.DownwardAPIVolumeSource{
+							Items: []corev1.DownwardAPIVolumeFile{
+								{
+									Path: "external-ip",
+									FieldRef: &corev1.ObjectFieldSelector{
+										FieldPath: "metadata.annotations['believer.dev/external-ip']",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			Containers: []corev1.Container{
 				{
 					Name:  "game-server",
@@ -278,6 +301,12 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 						{
 							Name:  "OTEL_RESOURCE_ATTRIBUTES",
 							Value: otelResourceAttributes,
+						},
+					},
+					VolumeMounts: []corev1.VolumeMount{
+						{
+							Name:      "external-ip",
+							MountPath: "/var/run/fellowship/external-ip",
 						},
 					},
 					Ports: []corev1.ContainerPort{
