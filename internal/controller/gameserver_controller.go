@@ -306,7 +306,7 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							Name:      "external-ip",
-							MountPath: "/var/run/fellowship/external-ip",
+							MountPath: "/var/run/fellowship",
 						},
 					},
 					Ports: []corev1.ContainerPort{
