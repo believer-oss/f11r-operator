@@ -39,6 +39,11 @@ spec:
           spec:
             description: PlaytestSpec defines the desired state of Playtest
             properties:
+              disableGameServers:
+                default: false
+                description: DisableGameServers is true if game servers should not
+                  be created for this playtest
+                type: boolean
               displayName:
                 type: string
               feedbackURL:
