@@ -50,6 +50,10 @@ type PlaytestSpec struct {
 	// IncludeReadinessProbe is true if the game server should include a readiness probe
 	// +kubebuilder:default=false
 	IncludeReadinessProbe bool `json:"includeReadinessProbe,omitempty"`
+
+	// DisableGameServers is true if game servers should not be created for this playtest
+	// +kubebuilder:default=false
+	DisableGameServers bool `json:"disableGameServers,omitempty"`
 }
 
 type PlaytestGroupStatus struct {
