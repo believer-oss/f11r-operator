@@ -98,24 +98,26 @@ func (r *PlaytestReconciler) reconcilePlaytest(ctx context.Context, playtest *ga
 	}
 
 	// First, set up default groups
-	if len(playtest.Spec.Groups) == 0 {
-		for i := 1; i <= playtest.Spec.MinGroups; i++ {
-			playtest.Spec.Groups = append(playtest.Spec.Groups, gamev1alpha1.PlaytestGroup{
-				Name:  fmt.Sprintf("Group %d", i),
-				Users: []string{},
-			})
-		}
-	} else if len(playtest.Spec.Groups) < playtest.Spec.MinGroups {
-		for i := len(playtest.Spec.Groups); i < playtest.Spec.MinGroups; i++ {
-			log.Info("adding group", "group", fmt.Sprintf("Group %d", i))
+	if !playtest.Spec.DisableGameServers {
+		if len(playtest.Spec.Groups) == 0 {
+			for i := 1; i <= playtest.Spec.MinGroups; i++ {
+				playtest.Spec.Groups = append(playtest.Spec.Groups, gamev1alpha1.PlaytestGroup{
+					Name:  fmt.Sprintf("Group %d", i),
+					Users: []string{},
+				})
+			}
+		} else if len(playtest.Spec.Groups) < playtest.Spec.MinGroups {
+			for i := len(playtest.Spec.Groups); i < playtest.Spec.MinGroups; i++ {
+				log.Info("adding group", "group", fmt.Sprintf("Group %d", i))
 
-			playtest.Spec.Groups = append(playtest.Spec.Groups, gamev1alpha1.PlaytestGroup{
-				Name:  fmt.Sprintf("Group %d", i+1),
-				Users: []string{},
-			})
+				playtest.Spec.Groups = append(playtest.Spec.Groups, gamev1alpha1.PlaytestGroup{
+					Name:  fmt.Sprintf("Group %d", i+1),
+					Users: []string{},
+				})
+			}
+		} else if len(playtest.Spec.Groups) > playtest.Spec.MinGroups {
+			playtest.Spec.Groups = playtest.Spec.Groups[:playtest.Spec.MinGroups]
 		}
-	} else if len(playtest.Spec.Groups) > playtest.Spec.MinGroups {
-		playtest.Spec.Groups = playtest.Spec.Groups[:playtest.Spec.MinGroups]
 	}
 
 	// Then, auto assign any users, requeue each time for sanity
@@ -150,17 +152,19 @@ func (r *PlaytestReconciler) reconcilePlaytest(ctx context.Context, playtest *ga
 
 	// Create a gameserver for each group, if it doesn't exist
 	shouldRequeue := false
-	for _, group := range playtest.Spec.Groups {
-		var err error
+	if !playtest.Spec.DisableGameServers {
+		for _, group := range playtest.Spec.Groups {
+			var err error
 
-		shouldRequeue, err = r.reconcileGroupServer(ctx, playtest, group)
-		if err != nil {
-			return ctrl.Result{}, err
+			shouldRequeue, err = r.reconcileGroupServer(ctx, playtest, group)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
-	}
 
-	if len(playtest.Status.Groups) > playtest.Spec.MinGroups {
-		playtest.Status.Groups = playtest.Status.Groups[:playtest.Spec.MinGroups]
+		if len(playtest.Status.Groups) > playtest.Spec.MinGroups {
+			playtest.Status.Groups = playtest.Status.Groups[:playtest.Spec.MinGroups]
+		}
 	}
 
 	return ctrl.Result{Requeue: shouldRequeue}, nil
