@@ -54,6 +54,10 @@ type GameServerReconciler struct {
 	GamePortMax     int32
 	NetImguiPortMin int32
 	StatusPortMin   int32
+
+	// Optional per-pod trace mount, see --trace-mount-path.
+	TraceMountPath string
+	TraceHostPath  string
 }
 
 //+kubebuilder:rbac:groups=game.believer.dev,resources=gameservers,verbs=get;list;watch;create;update;patch;delete
@@ -355,6 +359,33 @@ func (r *GameServerReconciler) reconcilePod(ctx context.Context, gameServer *gam
 				},
 			},
 		},
+	}
+
+	// Optional per-pod trace mount, see --trace-mount-path.
+	if r.TraceMountPath != "" {
+		hostPathType := corev1.HostPathDirectoryOrCreate
+		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
+			Name: "trace-mount",
+			VolumeSource: corev1.VolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{
+					Path: r.TraceHostPath,
+					Type: &hostPathType,
+				},
+			},
+		})
+		pod.Spec.Containers[0].Env = append(pod.Spec.Containers[0].Env, corev1.EnvVar{
+			Name: "POD_NAME",
+			ValueFrom: &corev1.EnvVarSource{
+				FieldRef: &corev1.ObjectFieldSelector{
+					FieldPath: "metadata.name",
+				},
+			},
+		})
+		pod.Spec.Containers[0].VolumeMounts = append(pod.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
+			Name:        "trace-mount",
+			MountPath:   r.TraceMountPath,
+			SubPathExpr: "$(POD_NAME)",
+		})
 	}
 
 	if gameServer.Spec.IncludeReadinessProbe {
