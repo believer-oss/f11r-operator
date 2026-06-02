@@ -65,6 +65,8 @@ func main() {
 	var gamePortMax int
 	var netimguiPortMin int
 	var statusPortMin int
+	var traceMountPath string
+	var traceHostPath string
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -76,6 +78,8 @@ func main() {
 	flag.IntVar(&gamePortMax, "game-port-max", 7800, "upper bound of game port range")
 	flag.IntVar(&netimguiPortMin, "netimgui-port-min", 7800, "lower bound of netimgui port range")
 	flag.IntVar(&statusPortMin, "status-port-min", 9000, "lower bound of status port range")
+	flag.StringVar(&traceMountPath, "trace-mount-path", "", "In-container path where a per-pod hostPath trace volume is mounted; empty disables the feature.")
+	flag.StringVar(&traceHostPath, "trace-host-path", "/var/lib/utrace", "Host directory used as the hostPath source for the per-pod trace volume.")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -125,6 +129,8 @@ func main() {
 		GamePortMax:     int32(gamePortMax),
 		NetImguiPortMin: int32(netimguiPortMin),
 		StatusPortMin:   int32(statusPortMin),
+		TraceMountPath:  traceMountPath,
+		TraceHostPath:   traceHostPath,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GameServer")
 		os.Exit(1)

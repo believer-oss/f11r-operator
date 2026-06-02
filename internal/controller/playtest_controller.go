@@ -97,10 +97,10 @@ func (r *PlaytestReconciler) reconcilePlaytest(ctx context.Context, playtest *ga
 		}
 	}
 
-    // If we don't want servers, group management below
-    if playtest.Spec.DisableGameServers {
-        return ctrl.Result{}, nil
-    }
+	// If we don't want servers, group management below
+	if playtest.Spec.DisableGameServers {
+		return ctrl.Result{}, nil
+	}
 
 	// First, set up default groups
 	if len(playtest.Spec.Groups) == 0 {
