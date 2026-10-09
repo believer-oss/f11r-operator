@@ -247,6 +247,11 @@ func (in *PlaytestSpec) DeepCopyInto(out *PlaytestSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.GameClientCmdArgs != nil {
+		in, out := &in.GameClientCmdArgs, &out.GameClientCmdArgs
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Groups != nil {
 		in, out := &in.Groups, &out.Groups
 		*out = make([]PlaytestGroup, len(*in))

@@ -117,3 +117,28 @@ var _ = Describe("PlaytestController", func() {
 		})
 	})
 })
+
+var _ = Describe("PlaytestController gameClientCmdArgs", func() {
+	It("keeps gameClientCmdArgs through create and reconcile", func() {
+		ctx := context.Background()
+		key := types.NamespacedName{Namespace: "default", Name: "client-args-playtest"}
+		pt := &gamev1alpha1.Playtest{
+			ObjectMeta: metav1.ObjectMeta{Namespace: key.Namespace, Name: key.Name},
+			Spec: gamev1alpha1.PlaytestSpec{
+				StartTime:          metav1.Now(),
+				DisableGameServers: true,
+				GameClientCmdArgs:  []string{"-tracefile=test.utrace", "-statnamedevents"},
+			},
+		}
+		Expect(k8sClient.Create(ctx, pt)).To(Succeed())
+		DeferCleanup(func() { Expect(k8sClient.Delete(ctx, pt)).To(Succeed()) })
+
+		rec := &PlaytestReconciler{Client: k8sClient, Scheme: scheme.Scheme}
+		_, err := rec.Reconcile(ctx, ctrl.Request{NamespacedName: key})
+		Expect(err).ToNot(HaveOccurred())
+
+		got := &gamev1alpha1.Playtest{}
+		Expect(k8sClient.Get(ctx, key, got)).To(Succeed())
+		Expect(got.Spec.GameClientCmdArgs).To(Equal([]string{"-tracefile=test.utrace", "-statnamedevents"}))
+	})
+})

@@ -48,6 +48,13 @@ spec:
                 type: string
               feedbackURL:
                 type: string
+              gameClientCmdArgs:
+                description: |-
+                  GameClientCmdArgs are extra command-line arguments Friendshipper appends when
+                  launching the game client for this playtest. The operator does not read this field.
+                items:
+                  type: string
+                type: array
               gameServerCmdArgs:
                 items:
                   type: string

@@ -44,6 +44,9 @@ type PlaytestSpec struct {
 	// +optional
 	UsersToAutoAssign []string `json:"usersToAutoAssign,omitempty"`
 	GameServerCmdArgs []string `json:"gameServerCmdArgs,omitempty"`
+	// GameClientCmdArgs are extra command-line arguments Friendshipper appends when
+	// launching the game client for this playtest. The operator does not read this field.
+	GameClientCmdArgs []string `json:"gameClientCmdArgs,omitempty"`
 
 	Groups []PlaytestGroup `json:"groups,omitempty"`
 
